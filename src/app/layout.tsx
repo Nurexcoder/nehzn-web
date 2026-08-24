@@ -1,21 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, Hanken_Grotesk } from "next/font/google";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-// Sora echoes the geometric construction of the mark; Hanken Grotesk keeps
-// body copy quiet underneath it.
-const sora = Sora({
-  variable: "--font-sora",
+// DM Sans carries everything; Playfair appears only as an italic, inside
+// headlines, so emphasis has a different voice rather than just a colour.
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const hanken = Hanken_Grotesk({
-  variable: "--font-hanken",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FDFCFB",
+  themeColor: "#FBFAF7",
 };
 
 export default function RootLayout({
@@ -54,7 +55,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${sora.variable} ${hanken.variable} antialiased`}>
+      <body className={`${dmSans.variable} ${playfair.variable} antialiased`}>
         {children}
         <Toaster position="top-center" richColors />
       </body>

@@ -1,400 +1,547 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 import {
-  Bell,
+  ArrowDownRight,
+  ArrowRight,
+  ChevronRight,
   Compass,
   Dice5,
-  EyeOff,
-  Hand,
-  MapPin,
-  Shield,
+  Heart,
+  Menu,
+  Music2,
   Sparkles,
-  Timer,
-  Users,
+  Check,
+  X,
 } from "lucide-react";
 
-import { Mark } from "@/components/brand";
-import { SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { SuggestionForm } from "@/components/suggestion-form";
 import { WaitlistForm } from "@/components/waitlist-form";
 
+/** Self-hosted rather than hotlinked, so the page never depends on a CDN. */
+const photos = {
+  coffee: "/photos/coffee.jpg",
+  city: "/photos/city.jpg",
+  walk: "/photos/walk.jpg",
+  cafe: "/photos/cafe.jpg",
+  // Faces get their own frames — a scene crops badly into a 128px circle.
+  alex: "/photos/portrait-a.jpg",
+  sam: "/photos/portrait-b.jpg",
+  mina: "/photos/portrait-c.jpg",
+};
+
+type Choice = { left: string; right: string; note: string };
+
+const choices: Choice[] = [
+  { left: "Coffee", right: "Chai", note: "A tiny preference, already telling a story." },
+  { left: "Mountains", right: "Beach", note: "The places we choose shape the way we wander." },
+  { left: "Plan ahead", right: "Go with the flow", note: "There is more than one way to move through a day." },
+  {
+    left: "Find the playlist",
+    right: "Find the view",
+    note: "Sometimes a feeling arrives through sound. Sometimes through a place.",
+  },
+];
+
+const dicePrompts = [
+  "Find something you have never noticed before.",
+  "Take the long way home today.",
+  "Ask someone what they are listening to.",
+  "Notice the colour you keep seeing.",
+  "Make one ordinary moment memorable.",
+];
+
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <div className="min-h-screen bg-ivory">
-      <SiteHeader />
-      <main>
-        <Hero />
-        <Concept />
-        <Today />
-        <Discover />
-        <Safety />
-        <Join />
-        <Suggest />
-      </main>
-      <SiteFooter />
-    </div>
+    <main>
+      <Header menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+      <Hero />
+      <ChoiceSection />
+      <IdeaSection />
+      <HowSection />
+      <TodaySection />
+      <DiscoverSection />
+      <PrivacySection />
+      <SuggestionSection />
+      <WaitlistSection />
+      <Footer />
+    </main>
   );
 }
 
-/* -------------------------------------------------------------------------- */
+/* ------------------------------------------------------------- header ---- */
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return <p className="eyebrow text-teal">{children}</p>;
-}
-
-/**
- * Stands in for the lifestyle photography in the comps. Layered teal washes and
- * one arc echoing the mark — it ships with the site, so there is nothing to
- * license and nothing to load.
- */
-function Atmosphere({
-  className = "",
-  tone = "teal",
+function Header({
+  menuOpen,
+  setMenuOpen,
 }: {
-  className?: string;
-  tone?: "teal" | "coral";
+  menuOpen: boolean;
+  setMenuOpen: (fn: (open: boolean) => boolean) => void;
 }) {
-  const base =
-    tone === "coral"
-      ? "from-coral-wash via-ivory to-teal-wash"
-      : "from-teal-wash via-ivory to-surface-cool";
   return (
-    <div
-      className={`relative overflow-hidden rounded-[2rem] bg-gradient-to-br ${base} ${className}`}
-      aria-hidden="true"
-    >
-      {/* Layered light, rather than a picture of anything. */}
-      <div className="absolute -right-20 -top-24 size-72 rounded-full bg-white/70 blur-3xl" />
-      <div className="absolute right-8 top-12 size-40 rounded-full bg-teal/10 blur-2xl" />
-      <div className="absolute -bottom-28 -left-20 size-80 rounded-full bg-coral/10 blur-3xl" />
-      <div className="absolute bottom-16 left-10 size-32 rounded-full bg-teal-pale/25 blur-2xl" />
-
-      {/* The mark, echoed small and low — a signature, not a subject. */}
-      <svg
-        viewBox="0 0 160 111"
-        className="absolute bottom-[14%] left-1/2 w-[34%] -translate-x-1/2 opacity-[0.13]"
-        fill="none"
-      >
-        <circle cx="80" cy="23" r="23" className="fill-teal" />
-        <path
-          d="M9.3 49.6 A74.2 74.2 0 0 0 150.7 49.6"
-          className="stroke-charcoal"
-          strokeWidth="18.6"
-          strokeLinecap="round"
+    <header className="site-header">
+      <a className="brand" href="#top" aria-label="Nehzn — home">
+        <Image className="brand-mark" src="/brand/mark.svg" alt="" width={38} height={26} priority />
+        <Image
+          className="brand-wordmark"
+          src="/brand/wordmark.svg"
+          alt="Nehzn"
+          width={113}
+          height={14}
+          priority
         />
-      </svg>
-    </div>
+      </a>
+      <nav className={menuOpen ? "nav-links nav-open" : "nav-links"} aria-label="Main">
+        <a href="#how-it-works" onClick={() => setMenuOpen(() => false)}>How it works</a>
+        <a href="#discover" onClick={() => setMenuOpen(() => false)}>Discover</a>
+        <a href="#about" onClick={() => setMenuOpen(() => false)}>About</a>
+      </nav>
+      {/* No "Log in": the app isn't open yet, and a door that leads nowhere is
+          the fastest way to lose someone's trust. */}
+      <a className="button button-small header-cta" href="#waitlist">
+        Join the waitlist <ArrowRight size={15} />
+      </a>
+      <button
+        className="menu-button"
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen((open) => !open)}
+      >
+        {menuOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+    </header>
   );
 }
 
-/* ---------------------------------------------------------------- hero ---- */
+/* --------------------------------------------------------------- hero ---- */
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-gradient-to-b from-surface-cool to-transparent" />
-      <div className="container-page grid items-center gap-14 py-16 md:py-24 lg:grid-cols-2 lg:gap-20">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-ambient-sm">
-            <Sparkles className="size-4 text-coral" />
-            <span className="eyebrow text-coral">A new way to connect</span>
-          </span>
+    <section className="hero" id="top">
+      <div className="hero-copy">
+        <p className="eyebrow">A different way to discover</p>
+        <h1>
+          People are more than a <em>profile.</em>
+        </h1>
+        <p className="hero-text">
+          Nehzn helps you discover the little things that connect you to people
+          you might naturally click with.
+        </p>
+        <div className="hero-actions">
+          <a className="button" href="#waitlist">
+            Join the waitlist <ArrowRight size={17} />
+          </a>
+          <a className="text-link" href="#experience">
+            Explore Nehzn <ArrowDownRight size={17} />
+          </a>
+        </div>
+        <div className="hero-aside">
+          <span className="signal-dot" /> Not a dating app. Not another feed. Something more human.
+        </div>
+      </div>
 
-          <h1 className="mt-7 font-display text-[2.75rem] font-semibold leading-[1.05] text-ink sm:text-6xl">
-            Find your people.
-            <br />
-            <em className="not-italic text-teal">Naturally.</em>
-          </h1>
+      <div className="hero-collage" aria-hidden="true">
+        <div className="collage-orbit orbit-one" />
+        <div className="collage-orbit orbit-two" />
+        <figure className="photo photo-one">
+          <Image src={photos.coffee} alt="" fill sizes="210px" priority />
+          <figcaption>
+            <span>Coffee, oat milk</span>
+            <b>01</b>
+          </figcaption>
+        </figure>
+        <figure className="photo photo-two">
+          <Image src={photos.city} alt="" fill sizes="195px" />
+          <figcaption>
+            <span>Wander after dark</span>
+            <b>02</b>
+          </figcaption>
+        </figure>
+        <figure className="photo photo-three">
+          <Image src={photos.walk} alt="" fill sizes="215px" />
+          <figcaption>
+            <span>Walk the long way</span>
+            <b>03</b>
+          </figcaption>
+        </figure>
+        <div className="connection-line line-one">
+          <span>same little ritual</span>
+        </div>
+        <div className="connection-line line-two">
+          <span>unexpected signal</span>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-            People are more than a profile. Nehzn helps you discover the little
-            things you have in common — and the people you might naturally click
-            with in the real world.
-          </p>
+/* ------------------------------------------------------------- choice ---- */
 
-          <div className="mt-9 max-w-xl" id="join-top">
-            <WaitlistForm compact />
-          </div>
+function ChoiceSection() {
+  const [active, setActive] = useState(0);
+  const [picked, setPicked] = useState<string[]>([]);
+
+  const choose = (value: string) => {
+    if (picked[active]) return;
+    setPicked((current) => [...current, value]);
+    if (active < choices.length - 1) {
+      window.setTimeout(() => setActive((current) => current + 1), 380);
+    }
+  };
+
+  const answered = Boolean(picked[active]);
+  const progress = ((active + (answered ? 1 : 0)) / choices.length) * 100;
+
+  return (
+    <section className="choice-section section-pad" id="experience">
+      <div className="section-intro centered">
+        <p className="eyebrow">Try a tiny signal</p>
+        <h2>
+          Let&rsquo;s start with something <em>small.</em>
+        </h2>
+        <p>No profile. No sign-up. Just a choice.</p>
+      </div>
+
+      <div className="choice-card">
+        <div className="choice-topline">
+          <span>0{active + 1} / 0{choices.length}</span>
+          <span>THIS OR THAT</span>
+        </div>
+        <div className="choice-progress">
+          <span style={{ width: `${progress}%` }} />
         </div>
 
-        <div className="relative">
-          <Atmosphere className="aspect-[4/5] w-full shadow-ambient-lg lg:aspect-[4/4.6]" />
-          {/* The product's most characteristic moment, floating over the image. */}
-          <div className="absolute inset-x-5 bottom-5 rounded-3xl border border-white/60 bg-white/85 p-6 shadow-ambient backdrop-blur-xl sm:inset-x-8 sm:bottom-8">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-2">
-                <Bell className="size-3.5 text-coral" />
-                <span className="eyebrow text-coral">Daily ping</span>
-              </span>
-              <span className="text-xs text-ink-faint">just now</span>
+        {answered ? (
+          <div className="choice-confirmation">
+            <Check size={22} />
+            <p>{choices[active].note}</p>
+          </div>
+        ) : (
+          <>
+            <h3>
+              What feels like you <span>today?</span>
+            </h3>
+            <div className="choice-options">
+              <button onClick={() => choose(choices[active].left)}>
+                {choices[active].left}
+                <ArrowRight size={17} />
+              </button>
+              <div className="or">or</div>
+              <button onClick={() => choose(choices[active].right)}>
+                {choices[active].right}
+                <ArrowRight size={17} />
+              </button>
             </div>
-            <p className="mt-3 font-display text-xl font-semibold leading-snug text-ink">
-              Something red near you — go find it
-            </p>
-            <p className="mt-2 text-sm text-ink-faint">
-              One prompt a day. Everyone gets it at the same time.
-            </p>
+          </>
+        )}
+      </div>
+
+      <div className={picked.length === choices.length ? "choice-result visible" : "choice-result"}>
+        <Sparkles size={17} />
+        <span>Interesting.</span>
+        <strong>Those little choices say more than you think.</strong>
+        <p>Nehzn looks for patterns in the little things — not labels.</p>
+      </div>
+    </section>
+  );
+}
+
+/* --------------------------------------------------------------- idea ---- */
+
+function IdeaSection() {
+  return (
+    <section className="idea-section section-pad" id="about">
+      <div className="idea-visual" aria-hidden="true">
+        <div className="profile-card">
+          <div className="profile-head">
+            <div className="mini-avatar">
+              <Image src={photos.alex} alt="" width={25} height={25} />
+            </div>
+            <span>Alex, 28</span>
+            <span className="profile-menu">•••</span>
+          </div>
+          <div className="profile-image">
+            <Image src={photos.cafe} alt="" width={305} height={220} />
+          </div>
+          <div className="profile-tags">
+            <span>Music</span>
+            <span>Travel</span>
+            <span>Good food</span>
+          </div>
+          <p>Always looking for the next good place.</p>
+        </div>
+        <div className="signal-stack">
+          <div>
+            <Music2 size={17} />
+            <span>same song on repeat</span>
+          </div>
+          <div>
+            <Compass size={17} />
+            <span>takes the scenic route</span>
+          </div>
+          <div>
+            <Heart size={17} />
+            <span>orders dessert first</span>
           </div>
         </div>
       </div>
-    </section>
-  );
-}
 
-/* ------------------------------------------------------------- concept ---- */
-
-const CONCEPT = [
-  {
-    step: "1",
-    label: "What you say",
-    title: "Profile & interests",
-    body: "The foundation — who you are, what you love, what you're into. A start, not the whole story.",
-    icon: Users,
-    tone: "teal" as const,
-  },
-  {
-    step: "2",
-    label: "What you do",
-    title: "Choices & moments",
-    body: "A daily ping, ten quick this-or-that picks, the odd dice roll. Thirty seconds that say more than a bio.",
-    icon: Compass,
-    tone: "coral" as const,
-  },
-  {
-    step: "3",
-    label: "What you discover",
-    title: "People who fit",
-    body: "Echoes — people whose day rhymed with yours. You both wave, or nothing happens at all.",
-    icon: Hand,
-    tone: "invert" as const,
-  },
-];
-
-function Concept() {
-  return (
-    <section id="concept" className="section">
-      <div className="container-page">
-        <div className="mx-auto max-w-2xl text-center">
-          <Eyebrow>The Nehzn idea</Eyebrow>
-          <h2 className="mt-4 font-display text-4xl font-semibold leading-tight text-ink sm:text-5xl">
-            The little things tell a bigger story.
-          </h2>
+      <div className="idea-copy">
+        <p className="eyebrow">The big idea</p>
+        <h2>
+          What if discovering people didn&rsquo;t start with a <em>profile?</em>
+        </h2>
+        <p>A profile tells people what you want them to know.</p>
+        <p className="big-line">Life reveals the rest.</p>
+        <div className="idea-footnote">
+          <span className="number">01</span>
+          <span>
+            Choices, rhythms, places, little unexpected decisions. The parts that
+            feel most like you are often the parts you never think to list.
+          </span>
         </div>
-
-        <ol className="mt-16 grid gap-6 md:grid-cols-3">
-          {CONCEPT.map((item, index) => {
-            const invert = item.tone === "invert";
-            return (
-              <li
-                key={item.step}
-                className={[
-                  "rounded-[2rem] p-8 shadow-ambient",
-                  invert ? "bg-teal text-white" : "bg-surface-warm",
-                  // A gentle stagger, so the row reads as a sequence.
-                  index === 1 ? "md:mt-8" : index === 2 ? "md:mt-16" : "",
-                ].join(" ")}
-              >
-                <span
-                  className={[
-                    "inline-flex size-12 items-center justify-center rounded-full",
-                    invert ? "bg-white/15 text-white" : item.tone === "coral" ? "bg-coral-wash text-coral" : "bg-teal-wash text-teal",
-                  ].join(" ")}
-                >
-                  <item.icon className="size-5" />
-                </span>
-                <p className={`eyebrow mt-6 ${invert ? "text-white/70" : "text-ink-faint"}`}>
-                  {item.step}. {item.label}
-                </p>
-                <h3
-                  className={`mt-2 font-display text-2xl font-semibold ${invert ? "text-white" : "text-ink"}`}
-                >
-                  {item.title}
-                </h3>
-                <p className={`mt-3 leading-relaxed ${invert ? "text-white/85" : "text-ink-soft"}`}>
-                  {item.body}
-                </p>
-              </li>
-            );
-          })}
-        </ol>
       </div>
     </section>
   );
 }
 
-/* --------------------------------------------------------------- today ---- */
+/* ---------------------------------------------------------------- how ---- */
 
-const TODAY = [
+const steps = [
   {
-    icon: Bell,
-    title: "The Daily Ping",
-    body: "One prompt, once a day, for everyone at once. Answer it and you unlock what everyone nearby said.",
+    n: "01",
+    icon: <Sparkles size={23} />,
+    title: "Show a little.",
+    body: "Create a profile. Choose what you want to share, and keep the rest for later.",
   },
   {
-    icon: Timer,
-    title: "This-or-That",
-    body: "Ten binary picks, about twenty seconds. Sunrise or sunset. We never score you on it.",
+    n: "02",
+    icon: <Compass size={23} />,
+    title: "Live normally.",
+    body: "Make choices. Answer small questions. Notice things. Try something new.",
   },
   {
-    icon: Dice5,
-    title: "Dice Day",
-    body: "One optional micro-adventure. Skipping is free, and always will be.",
+    n: "03",
+    icon: <Heart size={23} />,
+    title: "Discover naturally.",
+    body: "Find people who might genuinely click with the way you move through the world.",
   },
 ];
 
-function Today() {
+function HowSection() {
   return (
-    <section id="today" className="section bg-surface-warm">
-      <div className="container-page grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
-        <div>
-          <Eyebrow>Thirty seconds a day</Eyebrow>
-          <h2 className="mt-4 font-display text-4xl font-semibold leading-tight text-ink sm:text-[2.75rem]">
-            Capturing reality, not a curated life.
-          </h2>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-soft">
-            The Daily Ping isn&rsquo;t about perfect photos. A prompt drops, you
-            react, and real moments connect you with people seeing the same
-            thing. No streaks. Skipping costs you nothing.
-          </p>
-
-          <ul className="mt-10 space-y-6">
-            {TODAY.map((item) => (
-              <li key={item.title} className="flex gap-4">
-                <span className="mt-0.5 inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-teal shadow-ambient-sm">
-                  <item.icon className="size-5" />
-                </span>
-                <div>
-                  <h3 className="font-display text-lg font-semibold text-ink">{item.title}</h3>
-                  <p className="mt-1 leading-relaxed text-ink-soft">{item.body}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <Atmosphere tone="coral" className="aspect-square w-full shadow-ambient-lg" />
+    <section className="how-section section-pad" id="how-it-works">
+      <div className="section-intro">
+        <p className="eyebrow">How Nehzn works</p>
+        <h2>
+          Less filling out.
+          <br />
+          <em>More living.</em>
+        </h2>
       </div>
-    </section>
-  );
-}
 
-/* ------------------------------------------------------------ discover ---- */
-
-const DISCOVER = [
-  {
-    icon: Hand,
-    title: "Wave, never swipe",
-    body: "One gesture, and it only means something when it's mutual. Nothing to reject, nothing to be rejected by.",
-  },
-  {
-    icon: EyeOff,
-    title: "Reveals are earned",
-    body: "Echoes stay anonymous until you both wave. Do a Stranger Sync task and identities unlock together.",
-  },
-  {
-    icon: MapPin,
-    title: "Hotspots, for seven days",
-    body: "Group rooms pinned to a real place, with the joining rules shown up front. Then they end, on purpose.",
-  },
-];
-
-function Discover() {
-  return (
-    <section id="discover" className="section">
-      <div className="container-page">
-        <div className="mx-auto max-w-2xl text-center">
-          <Eyebrow>Discover</Eyebrow>
-          <h2 className="mt-4 font-display text-4xl font-semibold leading-tight text-ink sm:text-5xl">
-            Who you are is more than a profile.
-          </h2>
-          <p className="mt-5 text-lg leading-relaxed text-ink-soft">
-            No swiping on faces. No bios to perform. Just the quiet overlap
-            between two ordinary days.
-          </p>
-        </div>
-
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
-          {DISCOVER.map((item) => (
-            <article
-              key={item.title}
-              className="rounded-[2rem] border border-border bg-white p-8 shadow-ambient-sm transition-shadow hover:shadow-ambient"
-            >
-              <span className="inline-flex size-12 items-center justify-center rounded-full bg-teal-wash text-teal">
-                <item.icon className="size-5" />
-              </span>
-              <h3 className="mt-6 font-display text-xl font-semibold text-ink">{item.title}</h3>
-              <p className="mt-3 leading-relaxed text-ink-soft">{item.body}</p>
+      <div className="steps">
+        {steps.map((step, index) => (
+          <div key={step.n} style={{ display: "contents" }}>
+            <article className="step">
+              <span>{step.n}</span>
+              <div className="step-icon">{step.icon}</div>
+              <h3>{step.title}</h3>
+              <p>{step.body}</p>
             </article>
-          ))}
-        </div>
+            {index < steps.length - 1 ? (
+              <div className="step-arrow" aria-hidden="true">
+                <ArrowRight size={23} />
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+
+      <div className="flow-labels" aria-hidden="true">
+        <span>PROFILE</span>
+        <ArrowRight size={15} />
+        <span>LITTLE SIGNALS</span>
+        <ArrowRight size={15} />
+        <span>DISCOVERY</span>
       </div>
     </section>
   );
 }
 
-/* -------------------------------------------------------------- safety ---- */
+/* -------------------------------------------------------------- today ---- */
 
-const SAFETY = [
-  "Your exact location is never shown to anyone — only a rough distance.",
-  "Every profile field has its own audience: everyone, matches, or nobody.",
-  "Location is checked once when you join a room, and never tracked after.",
-  "Report and block are available on people, rooms, messages and photos.",
-];
+function TodaySection() {
+  const [diceMessage, setDiceMessage] = useState("Roll for a small detour");
 
-function Safety() {
+  const rollDice = () =>
+    setDiceMessage(dicePrompts[Math.floor(Math.random() * dicePrompts.length)]);
+
   return (
-    <section id="safety" className="section bg-surface-warm">
-      <div className="container-page grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
-        <div>
-          <span className="inline-flex size-12 items-center justify-center rounded-full bg-white text-teal shadow-ambient-sm">
-            <Shield className="size-5" />
+    <section className="today-section section-pad">
+      <div className="today-copy">
+        <p className="eyebrow">The today experience</p>
+        <h2>
+          Something interesting, <em>every day.</em>
+        </h2>
+        <p>
+          Daily Pings, unexpected choices, and tiny prompts help Nehzn understand
+          your vibe without asking you to fill out an endless personality test.
+        </p>
+        <button className="button" onClick={rollDice}>
+          <Dice5 size={17} /> Roll the dice
+        </button>
+      </div>
+
+      <div className="phone-shell" aria-hidden="true">
+        <div className="phone-top">
+          <div className="mini-avatar">
+            <Image src={photos.mina} alt="" width={25} height={25} />
+          </div>
+          <Image src="/brand/mark.svg" alt="" width={34} height={24} />
+          <span>•••</span>
+        </div>
+
+        <div className="ping-card">
+          <div className="ping-photo">
+            <Image src={photos.city} alt="" fill sizes="300px" />
+          </div>
+          <span className="tiny-label">
+            <Sparkles size={12} /> DAILY PING
           </span>
-          <h2 className="mt-6 font-display text-4xl font-semibold leading-tight text-ink">
-            You decide who sees what.
-          </h2>
-          <p className="mt-5 text-lg leading-relaxed text-ink-soft">
-            Privacy isn&rsquo;t a settings page you have to go hunting for. It&rsquo;s
-            built into how the product works.
-          </p>
+          <h3>
+            Something red near you
+            <br />
+            <em>go find it.</em>
+          </h3>
+          <p>Capture the moment. Be the first to share your view today.</p>
+          <button>
+            Respond now <ArrowRight size={13} />
+          </button>
         </div>
 
-        <ul className="space-y-4">
-          {SAFETY.map((line) => (
-            <li
-              key={line}
-              className="flex items-start gap-4 rounded-2xl border border-border bg-white p-5 shadow-ambient-sm"
-            >
-              <span className="mt-1 size-2 shrink-0 rounded-full bg-teal" />
-              <p className="leading-relaxed text-ink-soft">{line}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="mini-card choice-mini">
+          <div>
+            <span className="tiny-label green">LIVE FLOW</span>
+            <h4>This-or-That Rush</h4>
+          </div>
+          <Sparkles size={18} />
+        </div>
+
+        <div className="mini-card dice-mini">
+          <div>
+            <span className="tiny-label coral">CHANCE ENCOUNTER</span>
+            <h4>Dice Day</h4>
+            <p>{diceMessage}</p>
+          </div>
+          <button className="dice-button" onClick={rollDice} aria-label="Roll the dice">
+            <Dice5 size={18} />
+          </button>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ---------------------------------------------------------------- join ---- */
+/* ----------------------------------------------------------- discover ---- */
 
-function Join() {
+function DiscoverSection() {
+  const [revealed, setRevealed] = useState(0);
+
   return (
-    <section id="join" className="section">
-      <div className="container-page">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-teal px-6 py-16 text-center shadow-ambient-lg sm:px-16 sm:py-20">
-          <div className="pointer-events-none absolute -right-20 -top-24 size-80 rounded-full bg-white/10" />
-          <div className="pointer-events-none absolute -bottom-28 -left-20 size-96 rounded-full bg-charcoal/10" />
+    <section className="discover-section section-pad" id="discover">
+      <div className="section-intro centered">
+        <p className="eyebrow">The unexpected part</p>
+        <h2>
+          Sometimes the interesting person isn&rsquo;t who you <em>expected.</em>
+        </h2>
+        <p>Two people. A few small signals. A reason to say hello.</p>
+      </div>
 
-          <div className="relative mx-auto max-w-2xl">
-            <Mark size={44} className="mx-auto brightness-0 invert" />
-            <h2 className="mt-7 font-display text-4xl font-semibold leading-tight text-white sm:text-5xl">
-              Ready to find your people?
-            </h2>
-            <p className="mt-4 text-lg text-white/85">
-              Nehzn isn&rsquo;t open yet. Leave your email and we&rsquo;ll tell you
-              the moment it is.
-            </p>
+      <div className="discovery-card">
+        <div className="person person-a">
+          <div className="person-photo">
+            <Image src={photos.sam} alt="" width={128} height={128} />
+          </div>
+          <span>Sam</span>
+          <small>late-night wanderer</small>
+        </div>
 
-            <div className="mx-auto mt-10 max-w-xl rounded-[1.75rem] bg-white/95 p-6 text-left shadow-ambient sm:p-8">
-              <WaitlistForm />
-            </div>
+        <div className="shared-signals">
+          <span className={revealed >= 1 ? "revealed" : ""}>
+            <Music2 size={16} /> Same song choice
+          </span>
+          <span className={revealed >= 2 ? "revealed" : ""}>
+            <Compass size={16} /> Similar rhythm
+          </span>
+          <span className={revealed >= 3 ? "revealed" : ""}>
+            <Sparkles size={16} /> Same thing today
+          </span>
+          <button onClick={() => setRevealed((current) => Math.min(current + 1, 3))}>
+            {revealed < 3 ? "Reveal a signal" : "You might click"} <ArrowRight size={15} />
+          </button>
+        </div>
+
+        <div className="person person-b">
+          <div className="person-photo">
+            <Image src={photos.mina} alt="" width={128} height={128} />
+          </div>
+          <span>Mina</span>
+          <small>always finds the good light</small>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------ privacy ---- */
+
+function PrivacySection() {
+  return (
+    <section className="privacy-section section-pad">
+      <div className="privacy-copy">
+        <p className="eyebrow">Connection, at your pace</p>
+        <h2>
+          You decide what people <em>discover</em> about you.
+        </h2>
+        <p>
+          Share what feels right. Reveal more when it feels right. Nehzn is built
+          for curiosity, not oversharing.
+        </p>
+        <div className="reveal-steps">
+          <span className="active">Stranger</span>
+          <ChevronRight size={15} />
+          <span className="active">Discovery</span>
+          <ChevronRight size={15} />
+          <span>Match</span>
+          <ChevronRight size={15} />
+          <span>Connection</span>
+        </div>
+      </div>
+
+      <div className="reveal-card" aria-hidden="true">
+        <div className="reveal-header">
+          <span className="privacy-pill">
+            <span /> private by default
+          </span>
+          <span>•••</span>
+        </div>
+        <div className="reveal-body">
+          <div className="reveal-avatar">
+            <Image src={photos.alex} alt="" width={52} height={52} />
+          </div>
+          <div>
+            <strong>Alex is nearby.</strong>
+            <p>They also chose the long way home.</p>
+          </div>
+        </div>
+        <div className="reveal-controls">
+          <span>Share this signal</span>
+          <div className="toggle">
+            <span />
           </div>
         </div>
       </div>
@@ -402,30 +549,65 @@ function Join() {
   );
 }
 
-/* ------------------------------------------------------------- suggest ---- */
+/* --------------------------------------------------------- suggestion ---- */
 
-function Suggest() {
+function SuggestionSection() {
   return (
-    <section id="suggest" className="section pt-0">
-      <div className="container-page grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
+    <section className="suggestion-section section-pad" id="suggest">
+      <div className="suggestion-heading">
+        <span className="section-number">04</span>
         <div>
-          <Eyebrow>Before we build it</Eyebrow>
-          <h2 className="mt-4 font-display text-4xl font-semibold leading-tight text-ink">
-            Tell us what it should do.
+          <p className="eyebrow">Help shape the beginning</p>
+          <h2>
+            What would make Nehzn more <em>interesting</em> to you?
           </h2>
-          <p className="mt-5 text-lg leading-relaxed text-ink-soft">
-            Nehzn is early, which is the useful part — nothing is set yet. If
-            there&rsquo;s something you&rsquo;d want it to do, something that worries
-            you, or something you&rsquo;d change, say so.
-          </p>
-          <p className="mt-4 leading-relaxed text-ink-faint">
-            You don&rsquo;t need to leave an email. Ideas are worth more than
-            addresses.
-          </p>
         </div>
+      </div>
+      <SuggestionForm />
+    </section>
+  );
+}
 
-        <SuggestionForm />
+/* ----------------------------------------------------------- waitlist ---- */
+
+function WaitlistSection() {
+  return (
+    <section className="waitlist-section section-pad" id="waitlist">
+      <div className="waitlist-mark">
+        <Image src="/brand/mark.svg" alt="" width={70} height={48} />
+      </div>
+      <div className="waitlist-content">
+        <p className="eyebrow">Be part of the beginning</p>
+        <h2>
+          Want to be there from the <em>beginning?</em>
+        </h2>
+        <p>
+          Nehzn is being built now. Join the waitlist and help shape what comes
+          next.
+        </p>
+        <WaitlistForm />
       </div>
     </section>
+  );
+}
+
+/* ------------------------------------------------------------- footer ---- */
+
+function Footer() {
+  return (
+    <footer className="site-footer">
+      <a className="brand" href="#top">
+        <Image className="brand-mark" src="/brand/mark.svg" alt="" width={38} height={26} />
+        <Image className="brand-wordmark" src="/brand/wordmark.svg" alt="Nehzn" width={113} height={14} />
+      </a>
+      <div className="footer-links">
+        <a href="#about">About</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#discover">Discover</a>
+        <a href="#suggest">Suggest something</a>
+        <a href="mailto:hello@nehzn.com">Contact</a>
+      </div>
+      <span className="footer-note">The little things connect us.</span>
+    </footer>
   );
 }
