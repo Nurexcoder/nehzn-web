@@ -1,26 +1,189 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   Nehzn — "Ethereal Tech"
+
+   Ivory rather than clinical white, deep charcoal type, teal for action and
+   coral for serendipity. Deliberately light-only: the product is a warm,
+   daylight thing, and a dark variant would be a different brand.
+   --------------------------------------------------------------------------- */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* brand */
+  --ivory: #fdfcfb;
+  --surface-warm: #f7f5f2;
+  --surface-cool: #f7f9ff;
+  --charcoal: #091a28;
+  --teal: #00685f;
+  --teal-deep: #085e56;
+  --teal-bright: #0e8e82;
+  --teal-pale: #70d8ca;
+  --teal-wash: #e2f4f1;
+  --coral: #ff7e67;
+  --coral-muted: #ffa08e;
+  --coral-wash: #ffefec;
+
+  --ink: #091a28;
+  --ink-soft: #3d4947;
+  --ink-faint: #6d7a77;
+  --hairline: #e6e3df;
+
+  --radius: 1rem;
+
+  /* shadcn tokens, mapped onto the brand */
+  --background: var(--ivory);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--teal);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-warm);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-warm);
+  --muted-foreground: var(--ink-faint);
+  --accent: var(--teal-wash);
+  --accent-foreground: var(--teal-deep);
+  --destructive: #ba1a1a;
+  --destructive-foreground: #ffffff;
+  --border: var(--hairline);
+  --input: var(--hairline);
+  --ring: var(--teal-bright);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-ivory: var(--ivory);
+  --color-surface-warm: var(--surface-warm);
+  --color-surface-cool: var(--surface-cool);
+  --color-charcoal: var(--charcoal);
+  --color-teal: var(--teal);
+  --color-teal-deep: var(--teal-deep);
+  --color-teal-bright: var(--teal-bright);
+  --color-teal-pale: var(--teal-pale);
+  --color-teal-wash: var(--teal-wash);
+  --color-coral: var(--coral);
+  --color-coral-muted: var(--coral-muted);
+  --color-coral-wash: var(--coral-wash);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+
+  --font-display: var(--font-sora);
+  --font-sans: var(--font-hanken);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-2xl: 3rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+    color: var(--ink);
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: var(--teal-wash);
+    color: var(--teal-deep);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--teal-bright);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Shadows are diffuse and tinted with the primary, never neutral grey —
+     the design system calls for "large blur, low opacity". */
+  .shadow-ambient {
+    box-shadow: 0 20px 40px rgba(14, 142, 130, 0.08);
+  }
+  .shadow-ambient-lg {
+    box-shadow: 0 32px 70px rgba(14, 142, 130, 0.12);
+  }
+  .shadow-ambient-sm {
+    box-shadow: 0 8px 20px rgba(14, 142, 130, 0.06);
+  }
+
+  /* All-caps eyebrow labels, generously tracked. */
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .container-page {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .container-page {
+      padding-inline: 4rem;
+    }
+  }
+
+  /* "Extra-wide breathability" — sections breathe more than usual. */
+  .section {
+    padding-block: 5rem;
+  }
+  @media (min-width: 768px) {
+    .section {
+      padding-block: 7.5rem;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
