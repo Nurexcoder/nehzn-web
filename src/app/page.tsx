@@ -605,6 +605,9 @@ function Footer() {
         <a href="#how-it-works">How it works</a>
         <a href="#discover">Discover</a>
         <a href="#suggest">Suggest something</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/community-guidelines">Guidelines</a>
         <a href="mailto:hello@nehzn.com">Contact</a>
       </div>
       <span className="footer-note">The little things connect us.</span>
